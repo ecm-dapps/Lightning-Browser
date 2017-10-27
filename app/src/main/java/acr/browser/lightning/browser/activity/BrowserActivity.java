@@ -244,6 +244,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     }
 
     private synchronized void initialize(Bundle savedInstanceState) {
+
         initializeToolbarHeight(getResources().getConfiguration());
         setSupportActionBar(mToolbar);
         ActionBar actionBar = getSupportActionBar();
