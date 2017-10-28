@@ -53,6 +53,7 @@ android {
 
     packagingOptions {
         exclude '.readme'
+        pickFirst  'META-INF/*'
     }
 }
 

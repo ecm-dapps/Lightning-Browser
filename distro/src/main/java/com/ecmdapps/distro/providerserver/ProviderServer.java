@@ -19,14 +19,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Scanner;
 import java.util.UUID;
 
 public class ProviderServer implements Responder {
@@ -73,7 +71,7 @@ public class ProviderServer implements Responder {
                 InputStream home;
                 try {
                     home = assetManager.open(homePage);
-                    response.sendFile(createFileFromInputStream(home, "home.html"));
+                    response.send("text/html", createStringFromInputStream(home));
                 } catch (IOException e) {
                     response.send(e.toString());
                 }
@@ -122,7 +120,7 @@ public class ProviderServer implements Responder {
             error.put("code", -32601);
             error.put("message", "Distro does not implement " + rpc_method);
         } catch (JSONException e) {
-            e.printStackTrace();
+            dhe.handle_error(e);
         }
         respond("error", error, jsonObject, requestID);
     }
@@ -301,28 +299,9 @@ public class ProviderServer implements Responder {
         }
     }
 
-    private File createFileFromInputStream(InputStream inputStream, String fileName) {
-
-        try{
-            File f = new File(fileName);
-            OutputStream outputStream = new FileOutputStream(f);
-            byte buffer[] = new byte[1024];
-            int length;
-
-            while((length=inputStream.read(buffer)) > 0) {
-                outputStream.write(buffer,0,length);
-            }
-
-            outputStream.close();
-            inputStream.close();
-
-            return f;
-        }catch (IOException e) {
-            //Logging exception
-            dhe.handle_error(e);
-        }
-
-        return null;
+    private static String createStringFromInputStream(InputStream is) {
+        Scanner s = new Scanner(is, "UTF-8").useDelimiter("\\A");
+        return s.hasNext() ? s.next() : "";
     }
 
     public void setup_web3(Intent intent) {
