@@ -2,6 +2,8 @@ package com.ecmdapps.distro.providerserver;
 
 
 import android.app.Activity;
+import android.content.Intent;
+import android.content.res.AssetManager;
 
 import com.koushikdutta.async.AsyncServer;
 import com.koushikdutta.async.http.AsyncHttpClient;
@@ -17,26 +19,35 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.UUID;
 
-class ProviderServer implements Responder {
+public class ProviderServer implements Responder {
     private AsyncHttpServer server;
     private AsyncServer asyncServer;
 
     private DHErrorHandler dhe;
     private Web3Resolver resolver;
 
+    private Activity ownerActivity;
+
     private HashMap<String, AsyncHttpServerResponse> responses;
 
-    ProviderServer(Activity ownerActivity, Web3Resolver resolver) {
-        this.dhe = new DHErrorHandler(ownerActivity, this);
-        this.server = new AsyncHttpServer();
-        this.asyncServer = new AsyncServer();
-        this.resolver = resolver;
-        this.responses = new HashMap<>();
+    public ProviderServer(Activity ownerActivity) {
+        ProviderServer self = this;
+        self.ownerActivity = ownerActivity;
+        self.dhe = new DHErrorHandler(ownerActivity, this);
+        self.server = new AsyncHttpServer();
+        self.asyncServer = new AsyncServer();
+        self.responses = new HashMap<>();
+        self.resolver = new Web3Resolver(ownerActivity, this);
     }
 
     public void start(){
@@ -56,7 +67,17 @@ class ProviderServer implements Responder {
                 response.getHeaders().set("Access-Control-Allow-Methods", "POST, GET, DELETE, PUT, OPTIONS");
                 response.getHeaders().set("Access-Control-Allow-Origin", "*");
                 response.getHeaders().set("Access-Control-Allow-Headers", "Origin, Content-Type, X-Auth-Token");
-                response.send("Dapphall server");
+                response.setContentType("text/html");
+                AssetManager assetManager = ownerActivity.getAssets();
+                String homePage = "www/providerHomePage.html";
+                InputStream home;
+                try {
+                    home = assetManager.open(homePage);
+                    response.sendFile(createFileFromInputStream(home, "home.html"));
+                } catch (IOException e) {
+                    response.send(e.toString());
+                }
+
             }
         });
 
@@ -76,7 +97,7 @@ class ProviderServer implements Responder {
                         dhe.handle_error(e);
                     }
                 } else {
-                    respond("error", "DistroHall could not parse your request, It must be JSON", new JSONObject(), requestUUID);
+                    respond("error", "Distro could not parse your request, It must be JSON", new JSONObject(), requestUUID);
                 }
             }
         });
@@ -84,78 +105,102 @@ class ProviderServer implements Responder {
         server.listen(asyncServer, 8545);
     }
 
-    private void handle_request(JSONObject data, String requestID){
+    private void respond_not_ready(JSONObject jsonObject, String requestID) {
         JSONObject error = new JSONObject();
+        try {
+            error.put("code", -32000);
+            error.put("message", "The web3 provider is not ready.");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        respond("error", error, jsonObject, requestID);
+    }
+
+    private void respond_not_implemented(String rpc_method, JSONObject jsonObject, String requestID) {
+        JSONObject error = new JSONObject();
+        try {
+            error.put("code", -32601);
+            error.put("message", "Distro does not implement " + rpc_method);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        respond("error", error, jsonObject, requestID);
+    }
+
+    private void handle_request(JSONObject data, String requestID){
         try {
             String rpc_method  = data.getString("method");
             JSONArray rpc_params = data.getJSONArray("params");
-
-            if (rpc_method.equals("eth_coinbase")) {
-                resolver.get_coinbase(data, requestID);
-
-            } else if (rpc_method.equals("distro_ping")) {
-                respond("distro_pong", data, requestID);
-
-            } else if (rpc_method.equals("eth_accounts")) {
-                resolver.get_accounts(data, requestID);
-
-            } else if (rpc_method.equals("eth_sendTransaction")) {
-                resolver.send_transaction(rpc_params, rpc_method, data, requestID);
-
-            } else if (rpc_method.equals("eth_signTransaction")) {
-                resolver.sign_transaction(rpc_params, data, requestID);
-
-            } else if (rpc_method.equals("eth_sign")) {
-                resolver.sign(rpc_params, data, requestID);
-
-            } else if (rpc_method.equals("personal_listAccounts")) {
-                resolver.get_accounts(data, requestID);
-
-            } else if (rpc_method.equals("eth_newFilter")) {
-                error.put("code", -32601);
-                error.put("message", "Distro's provider platform does not support" + rpc_method);
-                respond("error", error, data, requestID);
-
-            } else if (rpc_method.equals("eth_newBlockFilter")) {
-                error.put("code", -32601);
-                error.put("message", "Distro's provider platform does not support" + rpc_method);
-                respond("error", error, data, requestID);
-
-            } else if (rpc_method.equals("eth_newPendingTransactionFilter")) {
-                error.put("code", -32601);
-                error.put("message", "Distro's provider platform does not support " + rpc_method);
-                respond("error", error, data, requestID);
-
-            } else if (rpc_method.equals("eth_uninstallFilter")) {
-                error.put("code", -32601);
-                error.put("message", "Distro's provider platform does not support " + rpc_method);
-                respond("error", error, data, requestID);
-
-            } else if (rpc_method.equals("eth_getFilterChanges")) {
-                error.put("code", -32601);
-                error.put("message", "Distro's provider platform does not support " + rpc_method);
-                respond("error", error, data, requestID);
-
-            } else if (rpc_method.equals("eth_newFilter")) {
-                error.put("code", -32601);
-                error.put("message", "Distro's provider platform does not support " + rpc_method);
-                respond("error", error, data, requestID);
-
-            } else if (rpc_method.equals("personal_sign")) {
-                error.put("code", -32601);
-                error.put("message", "Distro's provider platform does not support " + rpc_method);
-                respond("error", error, data, requestID);
-
-            } else if (rpc_method.equals("personal_ecRecover")) {
-                error.put("code", -32601);
-                error.put("message", "Distro's provider platform does not support " + rpc_method);
-                respond("error", error, data, requestID);
-
-            } else if ( !rpc_method.startsWith("eth_") && !rpc_method.startsWith("net_") && !rpc_method.startsWith("web3_")) {
-                respond("", data, requestID);
-
+            if (!resolver.ready() && !rpc_method.startsWith("distro_")){
+                respond_not_ready(data, requestID);
             } else {
-                forward(data, requestID);
+                if (rpc_method.equals("distro_ready")) {
+                    respond(resolver.ready(), data, requestID);
+
+                } else if (rpc_method.equals("distro_loading")) {
+                    respond(resolver.loading(), data, requestID);
+
+                } else if (rpc_method.equals("distro_ping")) {
+                    respond("distro_pong", data, requestID);
+
+                } else if (rpc_method.equals("distro_start")) {
+                    resolver.ask_for_credentials();
+                    respond("starting", data, requestID);
+
+                } else if (rpc_method.equals("distro_stop")) {
+                    respond_not_implemented(rpc_method, data, requestID);
+
+                } else if (rpc_method.equals("distro_changeNode")) {
+                    resolver.change_node(rpc_params, data, requestID);
+
+                } else if (rpc_method.equals("eth_coinbase")) {
+                    resolver.get_coinbase(data, requestID);
+
+                }  else if (rpc_method.equals("eth_accounts")) {
+                    resolver.get_accounts(data, requestID);
+
+                } else if (rpc_method.equals("eth_sendTransaction")) {
+                    resolver.send_transaction(rpc_params, rpc_method, data, requestID);
+
+                } else if (rpc_method.equals("eth_signTransaction")) {
+                    resolver.sign_transaction(rpc_params, data, requestID);
+
+                } else if (rpc_method.equals("eth_sign")) {
+                    resolver.sign(rpc_params, data, requestID);
+
+                } else if (rpc_method.equals("personal_listAccounts")) {
+                    resolver.get_accounts(data, requestID);
+
+                } else if (rpc_method.equals("eth_newFilter")) {
+                    respond_not_implemented(rpc_method, data, requestID);
+
+                } else if (rpc_method.equals("eth_newBlockFilter")) {
+                    respond_not_implemented(rpc_method, data, requestID);
+
+                } else if (rpc_method.equals("eth_newPendingTransactionFilter")) {
+                    respond_not_implemented(rpc_method, data, requestID);
+
+                } else if (rpc_method.equals("eth_uninstallFilter")) {
+                    respond_not_implemented(rpc_method, data, requestID);
+
+                } else if (rpc_method.equals("eth_getFilterChanges")) {
+                    respond_not_implemented(rpc_method, data, requestID);
+
+                } else if (rpc_method.equals("eth_newFilter")) {
+                    respond_not_implemented(rpc_method, data, requestID);
+
+                } else if (rpc_method.equals("personal_sign")) {
+                    respond_not_implemented(rpc_method, data, requestID);
+
+                } else if (rpc_method.equals("personal_ecRecover")) {
+                    respond_not_implemented(rpc_method, data, requestID);
+
+                } else if ( !rpc_method.startsWith("eth_") && !rpc_method.startsWith("net_") && !rpc_method.startsWith("web3_")) {
+                    respond("", data, requestID);
+
+                } else {
+                    forward(data, requestID);
+                }
             }
 
         } catch (JSONException e) {
@@ -202,7 +247,7 @@ class ProviderServer implements Responder {
         }
     }
 
-    public void respond(String result, JSONObject query_data, String requestID) {
+    public void respond(Object result, JSONObject query_data, String requestID) {
         try {
             JSONObject jsonResponse = new JSONObject();
             jsonResponse.put("id", query_data.getInt("id"));
@@ -253,6 +298,42 @@ class ProviderServer implements Responder {
             AsyncHttpServerResponse response = responses.get(requestID);
             response.send(jsonResponse);
             responses.remove(requestID);
+        }
+    }
+
+    private File createFileFromInputStream(InputStream inputStream, String fileName) {
+
+        try{
+            File f = new File(fileName);
+            OutputStream outputStream = new FileOutputStream(f);
+            byte buffer[] = new byte[1024];
+            int length;
+
+            while((length=inputStream.read(buffer)) > 0) {
+                outputStream.write(buffer,0,length);
+            }
+
+            outputStream.close();
+            inputStream.close();
+
+            return f;
+        }catch (IOException e) {
+            //Logging exception
+            dhe.handle_error(e);
+        }
+
+        return null;
+    }
+
+    public void setup_web3(Intent intent) {
+        resolver.setup(intent);
+    }
+
+    public void tx_approval_response(Intent intent) {
+        try {
+            resolver.approval_response(intent);
+        } catch (JSONException e) {
+            new DHErrorHandler(ownerActivity, ownerActivity).handle_error(e);
         }
     }
 }

@@ -52,7 +52,7 @@ import static com.ecmdapps.distro.providerserver.DHIntentStrings.REQUEST_ID_LABE
 import static com.ecmdapps.distro.providerserver.DHIntentStrings.RPC_METHOD_LABEL;
 import static com.ecmdapps.distro.providerserver.DHIntentStrings.SIGNONLY_LABEL;
 
-public class Web3Resolver {
+class Web3Resolver {
     private Future<Credentials> credentialsFuture;
     private Future<Web3j> web3Future;
 
@@ -76,11 +76,11 @@ public class Web3Resolver {
     private boolean credentialsLoaded = false;
     private boolean credentialsLoading = false;
 
-    public Web3Resolver(Activity activity)  {
+    Web3Resolver(Activity activity, ProviderServer providerServer)  {
         self = this;
         self.handler = new Handler();
         self.ownerActivity = activity;
-        self.r = new ProviderServer(ownerActivity, self);
+        self.r = providerServer;
         self.dhe = new DHErrorHandler(ownerActivity, self);
     }
 
@@ -91,7 +91,7 @@ public class Web3Resolver {
         self.ownerActivity.startActivityForResult(i, DHReqCodes.credentials_req_code());
     }
 
-    public void setup(Intent data) {
+    void setup(Intent data) {
         String p = data.getStringExtra(CREDENTIALS_LABEL);
         setup(p);
     }
@@ -159,7 +159,6 @@ public class Web3Resolver {
                 if(credentialsReady()){
                     try {
                         setCredentials();
-                        self.r.start();
                     } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException | NoSuchProviderException | ExecutionException | InterruptedException | IOException e) {
                         e.printStackTrace();
                         dhe.handle_error(e);
@@ -242,12 +241,22 @@ public class Web3Resolver {
         }
     }
 
-    String change_node(String node_url){
+    private String change_node(String node_url){
         String r = set_node(node_url);
         if (r.equals(node_url)){
             reload_web3();
         }
         return current_node();
+    }
+
+    void change_node(JSONArray rpc_params, JSONObject data, String requestID) {
+        if (rpc_params.length() > 0){
+            String node_url = rpc_params.optString(0);
+            String current_node_url = change_node(node_url);
+            r.respond(current_node_url, data, requestID);
+        } else {
+            r.respond(current_node(), data, requestID);
+        }
     }
 
     @SuppressLint("ApplySharedPref")
@@ -409,7 +418,7 @@ public class Web3Resolver {
         }
     }
 
-    public void approval_response(Intent data) throws JSONException {
+    void approval_response(Intent data) throws JSONException {
         String original_data_string = data.getStringExtra(ORIGINAL_DATA_LABEL);
         String request_id = data.getStringExtra(REQUEST_ID_LABEL);
         Boolean cancelled = data.getBooleanExtra(CANCELLED_LABEL, false);

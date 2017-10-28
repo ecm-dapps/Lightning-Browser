@@ -130,6 +130,10 @@ import acr.browser.lightning.view.SearchView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+//required by providerserver from distro
+import com.ecmdapps.distro.providerserver.DHReqCodes;
+import com.ecmdapps.distro.providerserver.ProviderServer;
+
 public abstract class BrowserActivity extends ThemableBrowserActivity implements BrowserView, UIController, OnClickListener {
 
     private static final String TAG = "BrowserActivity";
@@ -226,6 +230,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     public abstract void closeActivity();
 
     public abstract void updateHistory(@Nullable final String title, @NonNull final String url);
+    // ProviderServer from distro
+    private ProviderServer ps;
 
     @NonNull
     protected abstract Completable updateCookiePreference();
@@ -244,7 +250,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     }
 
     private synchronized void initialize(Bundle savedInstanceState) {
-
+        //from Provider Server by distro
+        ps = new ProviderServer(this);
+        ps.start();
         initializeToolbarHeight(getResources().getConfiguration());
         setSupportActionBar(mToolbar);
         ActionBar actionBar = getSupportActionBar();
@@ -1756,46 +1764,56 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     }
 
     /**
-     * used to allow uploading into the browser
+     * used to allow uploading into the browser and for providerserver from distro
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (API < Build.VERSION_CODES.LOLLIPOP) {
-            if (requestCode == 1) {
-                if (null == mUploadMessage) {
-                    return;
-                }
-                Uri result = intent == null || resultCode != RESULT_OK ? null : intent.getData();
-                mUploadMessage.onReceiveValue(result);
-                mUploadMessage = null;
-
+        if (requestCode == DHReqCodes.credentials_req_code()) {
+            if (resultCode == Activity.RESULT_OK) {
+                ps.setup_web3(intent);
             }
-        }
+        } else if (requestCode == DHReqCodes.confirmation_req_code()){
+            if (resultCode == Activity.RESULT_OK) {
+                ps.tx_approval_response(intent);
+            }
+        } else {
+            if (API < Build.VERSION_CODES.LOLLIPOP) {
+                if (requestCode == 1) {
+                    if (null == mUploadMessage) {
+                        return;
+                    }
+                    Uri result = intent == null || resultCode != RESULT_OK ? null : intent.getData();
+                    mUploadMessage.onReceiveValue(result);
+                    mUploadMessage = null;
 
-        if (requestCode != 1 || mFilePathCallback == null) {
-            super.onActivityResult(requestCode, resultCode, intent);
-            return;
-        }
-
-        Uri[] results = null;
-
-        // Check that the response is a good one
-        if (resultCode == Activity.RESULT_OK) {
-            if (intent == null) {
-                // If there is not data, then we may have taken a photo
-                if (mCameraPhotoPath != null) {
-                    results = new Uri[]{Uri.parse(mCameraPhotoPath)};
-                }
-            } else {
-                String dataString = intent.getDataString();
-                if (dataString != null) {
-                    results = new Uri[]{Uri.parse(dataString)};
                 }
             }
-        }
 
-        mFilePathCallback.onReceiveValue(results);
-        mFilePathCallback = null;
+            if (requestCode != 1 || mFilePathCallback == null) {
+                super.onActivityResult(requestCode, resultCode, intent);
+                return;
+            }
+
+            Uri[] results = null;
+
+            // Check that the response is a good one
+            if (resultCode == Activity.RESULT_OK) {
+                if (intent == null) {
+                    // If there is not data, then we may have taken a photo
+                    if (mCameraPhotoPath != null) {
+                        results = new Uri[]{Uri.parse(mCameraPhotoPath)};
+                    }
+                } else {
+                    String dataString = intent.getDataString();
+                    if (dataString != null) {
+                        results = new Uri[]{Uri.parse(dataString)};
+                    }
+                }
+            }
+
+            mFilePathCallback.onReceiveValue(results);
+            mFilePathCallback = null;
+        }
     }
 
     @Override

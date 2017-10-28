@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Distro: Accessing the ethereum network</title>
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <script src='./app.js'></script>
+  </head>
+  <body>
+    <nav class="navbar fixed-top navbar-dark bg-dark">
+      <a class="navbar-brand" href="#">Distro, accessing ethereum</a>
+    </nav>
+    <div class="container" id="app">
+      <div class="jumbotron text-center" id="account_locked">
+        <h1 class="display-3">Welcome to Distro!</h1>
+        <p class="lead">Unlock your account below</p>
+        <hr class="my-4">
+        <p class="lead">
+          <a class="btn btn-primary btn-lg" onclick="App.startResolver()" id="launch" href="#" role="button">Unlock</a>
+        </p>
+      </div>
+
+      <div class="row" id="account_unlocked" style="display:none;">
+        <div class="card">
+          <div class="card-header">
+            Account: <span id="address"></span> unlocked.
+          </div>
+          <div class="card-body">
+            <p class="card-title">
+              You have <span id="balance"></span> Eth.<br>
+            </p>
+          </div>
+          <ul class="list-group list-group-flush" id="tokens"></ul>
+          <div class="card-footer text-muted">
+              <a href="#" class="card-link" onclick="App.initiateSend()" id="sendEth">Send Eth</a>
+              <a href="#" class="card-link" id="addtoken" disabled>Add Token</a>
+              <a href="#" class="card-link" id="sendToken" disabled>Send Token</a>
+          </div>
+        </div>
+      </div>
+      <p id="status"></p>
+    </div>
+  </body>
+</html>
