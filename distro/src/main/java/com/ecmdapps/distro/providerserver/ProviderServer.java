@@ -59,6 +59,22 @@ public class ProviderServer implements Responder {
             }
         });
 
+        server.get("/app.js", new HttpServerRequestCallback() {
+            @Override
+            public void onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
+                AssetManager assetManager = ownerActivity.getAssets();
+                String jsPage = "www/app.js";
+                InputStream js;
+                try {
+                    js = assetManager.open(jsPage);
+                    response.send("text/javascript", createStringFromInputStream(js));
+                } catch (IOException e) {
+                    response.send(e.toString());
+                }
+
+            }
+        });
+
         server.get("/", new HttpServerRequestCallback() {
             @Override
             public void onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
