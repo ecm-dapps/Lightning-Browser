@@ -4,11 +4,11 @@
 
     <PreferenceCategory android:title="@string/settings_about">
         <Preference
-            android:summary="@string/url_twitter"
-            android:title="@string/action_follow_me">
+            android:summary="@string/url_github"
+            android:title="@string/action_go_to_github">
             <intent
                 android:action="android.intent.action.VIEW"
-                android:data="http://twitter.com/RestainoAnthony">
+                android:data="@string/url_github">
                 <extra
                     android:name="SOURCE"
                     android:value="SELF" />
