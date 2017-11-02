@@ -412,7 +412,7 @@ public class LightningView {
             settings.setMediaPlaybackRequiresUserGesture(true);
         }
         if (API >= Build.VERSION_CODES.LOLLIPOP && !mIsIncognitoTab) {
-            settings.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
+            settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         } else if (API >= Build.VERSION_CODES.LOLLIPOP) {
             // We're in Incognito mode, reject
             settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
