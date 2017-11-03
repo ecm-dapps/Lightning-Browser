@@ -33615,6 +33615,11 @@ window.App = {
     status.innerHTML = message;
   },
 
+  setTxReponse: function (message) {
+    var status = document.getElementById('txResponse');
+    status.innerHTML = message;
+  },
+
   isDistroReady: function (cb) {
     var self = this;
     self.exec('distro_ready', 9999876, cb);
@@ -33633,6 +33638,10 @@ window.App = {
           self.setStatus(data.error.message);
         } else {
           self.setStatus(data.result);
+          self.startChecker();
+          __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#account_unlocked').hide();
+          __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#account_unlocking').show();
+          __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#account_locked').show();
         }
       }
     });
@@ -33651,7 +33660,92 @@ window.App = {
           self.setStatus(data.error.message);
         } else {
           self.setStatus(data.result);
+          __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#account_unlocked').hide();
+          __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#account_unlocking').hide();
+          __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#account_locked').show();
         }
+      }
+    });
+  },
+
+  startChecker:function () {
+    var self = this;
+    var cb = function (err, data) {
+      if (err) {
+        self.setStatus(data.error.message);
+      } else {
+        if (data.result === true) {
+          __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#account_unlocked').show();
+          __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#account_unlocking').hide();
+          __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#account_locked').hide();
+          self.populateHomePage();
+        } else {
+          __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#account_unlocked').hide();
+          __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#account_unlocking').text('Not Ready');
+          __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#account_unlocking').show();
+          __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#account_locked').show();
+        }
+      }
+    };
+    window.setTimeout(self.exec('distro_ready', Math.floor(Date.now() / 1000), cb), 2000);
+  },
+
+  populateHomePage: function () {
+    var self = this;
+    window.web3.eth.getAccounts(function (err, accs) {
+      if (err != null) {
+        window.alert('There was an error fetching your accounts.');
+        return;
+      }
+
+      if (accs.length === 0) {
+        window.alert('Couldn\'t get any accounts! Make sure your Ethereum client is configured correctly.');
+        return;
+      }
+
+      window.accounts = accs;
+      window.account = window.accounts[0];
+      var getTxHistory = '<a href="//etherscan.io/address/' + window.account + '">';
+      getTxHistory += '<h5>Get Your Transaction History on Etherscan.io</h5>';
+      getTxHistory += '</a>';
+      __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#address').text(window.account);
+      __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#sender-address').val(window.account);
+      __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#txHistory').html(getTxHistory);
+      window.web3.eth.getBalance(window.account, function (err, result) {
+        if (err) {
+          self.setStatus(err.toString());
+        } else {
+          __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#balance').text(result);
+        }
+      });
+    });
+  },
+
+  initiateSend: function () {
+    var self = this;
+    var sender = __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#sender-address').val();
+    var recipient = __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#recipient-address').val();
+    var ethValue = __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#eth-value').val();
+    var gasPrice = __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#gas-price').val();
+    var gasLimit = __WEBPACK_IMPORTED_MODULE_2_jquery___default()('gas-limit').val();
+    var txData = __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#tx-data').val();
+
+    var txObject = {
+      from: sender,
+      to: recipient,
+      value: ethValue,
+      gas: gasLimit,
+      gasPrice: gasPrice,
+      data: txData
+    };
+
+    window.web3.eth.send(txObject, function (err, txHash) {
+      if (err) {
+        self.setStatus(err.toString());
+        self.setTxResponse(err.toString());
+      } else {
+        var txResponse = 'Your transaction is being mined, hash is: ' + txHash;
+        self.setTxResponse(txResponse);
       }
     });
   },

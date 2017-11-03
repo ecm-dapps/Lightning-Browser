@@ -18,7 +18,9 @@
           <a class="btn btn-primary btn-lg" onclick="App.startResolver()" id="launch" href="#" role="button">Unlock</a>
         </p>
       </div>
-
+      <div class="row" id="account_unlocking" style="display:none">
+        <div class="progress-bar progress-bar-striped bg-danger" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">Unlocking account</div>
+      </div>
       <div class="row" id="account_unlocked" style="display:none;">
         <div class="card">
           <div class="card-header">
@@ -31,13 +33,59 @@
           </div>
           <ul class="list-group list-group-flush" id="tokens"></ul>
           <div class="card-footer text-muted">
-              <a href="#" class="card-link" onclick="App.initiateSend()" id="sendEth">Send Eth</a>
-              <a href="#" class="card-link" id="addtoken" disabled>Add Token</a>
-              <a href="#" class="card-link" id="sendToken" disabled>Send Token</a>
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#sendEthModal">sendEth</button>
+            <!-- <a href="#" class="card-link" id="addtoken" disabled>Add Token</a>
+            <a href="#" class="card-link" id="sendToken" disabled>Send Token</a> -->
           </div>
         </div>
       </div>
       <p id="status"></p>
+      <div class="modal fade" id="sendEthModal" tabindex="-1" role="dialog" aria-labelledby="sendEthModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="sendEthModalLabel">Send Ether</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form>
+                <div class="form-group">
+                  <label for="sender-address" class="col-form-label">Sender:</label>
+                  <input type="text" class="form-control" id="sender-address">
+                </div>
+                <div class="form-group">
+                  <label for="recipient-address" class="col-form-label">Recipient:</label>
+                  <input type="text" class="form-control" id="recipient-address">
+                </div>
+                <div class="form-group">
+                  <label for="eth=value" class="col-form-label">Value(ETH):</label>
+                  <input type="text" class="form-control" id="eth-value">
+                </div>
+                <div class="form-group">
+                  <label for="gas-limit" class="col-form-label">Gas Limit:</label>
+                  <input type="text" class="form-control" id="gas-limit" value="50000">
+                </div>
+                <div class="form-group">
+                  <label for="gas-price" class="col-form-label">Gas Price(GWEI):</label>
+                  <input type="text" class="form-control" id="gas-price" value="10">
+                </div>
+                <div class="form-group">
+                  <label for="tx-data" class="col-form-label">Data:</label>
+                  <input type="text" class="form-control" id="tx-data">
+                </div>                      
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="button" onclick="App.initiateSend()" class="btn btn-primary">Send message</button>
+              <p id="txResponse"></p>
+              <div id="txHistory"></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </body>
 </html>
