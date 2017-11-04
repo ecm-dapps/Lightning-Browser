@@ -33679,15 +33679,17 @@ window.App = {
           __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#account_unlocking').hide();
           __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#account_locked').hide();
           self.populateHomePage();
+          self.setStatus('populating');
         } else {
           __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#account_unlocked').hide();
           __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#account_unlocking').text('Not Ready');
           __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#account_unlocking').show();
           __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#account_locked').show();
+          self.setStatus('will check again');
         }
       }
     };
-    window.setTimeout(self.exec('distro_ready', Math.floor(Date.now() / 1000), cb), 2000);
+    window.setTimeout(self.exec('distro_ready', Math.floor(Date.now() / 1000), cb), 5000);
   },
 
   populateHomePage: function () {
@@ -33706,7 +33708,7 @@ window.App = {
       window.accounts = accs;
       window.account = window.accounts[0];
       var getTxHistory = '<a href="//etherscan.io/address/' + window.account + '">';
-      getTxHistory += '<h5>G et Your Transaction History on Etherscan.io</h5>';
+      getTxHistory += '<h5>Get Your Transaction History on Etherscan.io</h5>';
       getTxHistory += '</a>';
       __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#address').text(window.account);
       __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#sender-address').val(window.account);
@@ -33751,6 +33753,7 @@ window.App = {
   },
 
   exec: function (reqMethod, reqId, cb) {
+    this.setStatus('executing ' + reqMethod);
     var data = {
       jsonrpc: '2.0',
       id: reqId,
@@ -33793,6 +33796,7 @@ window.addEventListener('load', function () {
           // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
           window.web3 = new __WEBPACK_IMPORTED_MODULE_1_web3___default.a(new __WEBPACK_IMPORTED_MODULE_1_web3___default.a.providers.HttpProvider('http://localhost:8545'));
         }
+        window.App.startChecker();
         __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#account_locked').hide();
         __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#account_unlocked').show();
       } else {
