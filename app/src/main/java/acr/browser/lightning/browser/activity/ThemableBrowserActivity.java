@@ -16,7 +16,7 @@ import acr.browser.lightning.utils.ThemeUtils;
 
 public abstract class ThemableBrowserActivity extends AppCompatActivity {
 
-    // TODO: 6/26/17 get rid fo protected reference
+    // TODO: 6/26/17 get rid of protected reference
     @Inject protected PreferenceManager mPreferences;
 
     private int mTheme;

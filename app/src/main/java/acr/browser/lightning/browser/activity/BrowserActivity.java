@@ -6,6 +6,8 @@ package acr.browser.lightning.browser.activity;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -31,6 +33,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -251,8 +254,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 
     private synchronized void initialize(Bundle savedInstanceState) {
         //from Provider Server by distro
-        ps = new ProviderServer(this);
-        ps.start();
+        initializePS();
         initializeToolbarHeight(getResources().getConfiguration());
         setSupportActionBar(mToolbar);
         ActionBar actionBar = getSupportActionBar();
@@ -440,6 +442,34 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             mPresenter.setupTabs(intent);
             setIntent(null);
             mProxyUtils.checkForProxy(this);
+        }
+    }
+
+    private void initializePS() {
+        ps = new ProviderServer(this);
+        ps.start();
+        Intent notificationIntent = new Intent(this, BrowserActivity.class);
+        notificationIntent.putExtra("type", "EthPageUrl");
+        notificationIntent.putExtra("url", "http://localhost:8545");
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.ic_action_home)
+                        .setContentTitle("Web3 for Ethereum")
+                        .setContentText("Go to Ethereum Administration Home Page");
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 978, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setContentIntent(contentIntent);
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (manager != null) {
+            manager.notify(978, builder.build());
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent){
+        if (intent.getStringExtra("type").equals("EthPageUrl")){
+            String mUrl = intent.getStringExtra("url");
+            mPresenter.loadUrlInCurrentView(mUrl);
+        } else {
+            super.onNewIntent(intent);
         }
     }
 
