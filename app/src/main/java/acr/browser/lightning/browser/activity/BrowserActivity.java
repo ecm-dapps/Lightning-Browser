@@ -452,24 +452,23 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         notificationIntent.putExtra("type", "EthPageUrl");
         notificationIntent.putExtra("url", "http://localhost:8545");
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.ic_action_home)
-                        .setContentTitle("Web3 for Ethereum")
-                        .setContentText("Go to Ethereum Administration Home Page");
+                        .setSmallIcon(R.drawable.ic_webpage)
+                        .setContentTitle("The Ethereum Network is available")
+                        .setContentText("Got to http://localhost:8545 to start/stop/configure. Or access from your bookmarks");
         PendingIntent contentIntent = PendingIntent.getActivity(this, 978, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         builder.setContentIntent(contentIntent);
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (manager != null) {
-            manager.notify(978, builder.build());
+            manager.notify(0, builder.build());
         }
     }
 
     @Override
     protected void onNewIntent(Intent intent){
+        super.onNewIntent(intent);
         if (intent.getStringExtra("type").equals("EthPageUrl")){
             String mUrl = intent.getStringExtra("url");
             mPresenter.loadUrlInCurrentView(mUrl);
-        } else {
-            super.onNewIntent(intent);
         }
     }
 

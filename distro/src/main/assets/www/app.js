@@ -33706,7 +33706,7 @@ window.App = {
       window.accounts = accs;
       window.account = window.accounts[0];
       var getTxHistory = '<a href="//etherscan.io/address/' + window.account + '">';
-      getTxHistory += '<h5>Get Your Transaction History on Etherscan.io</h5>';
+      getTxHistory += '<h5>G et Your Transaction History on Etherscan.io</h5>';
       getTxHistory += '</a>';
       __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#address').text(window.account);
       __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#sender-address').val(window.account);

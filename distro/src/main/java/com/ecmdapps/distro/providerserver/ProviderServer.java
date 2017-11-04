@@ -69,7 +69,7 @@ public class ProviderServer implements Responder {
                 InputStream js;
                 try {
                     js = assetManager.open(jsPage);
-                    response.send("text/javascript", createStringFromInputStream(js));
+                    response.send("application/javascript", createStringFromInputStream(js));
                 } catch (IOException e) {
                     response.send(e.toString());
                 }
