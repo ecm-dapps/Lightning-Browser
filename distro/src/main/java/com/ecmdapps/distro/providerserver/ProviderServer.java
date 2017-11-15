@@ -4,9 +4,7 @@ package com.ecmdapps.distro.providerserver;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.AssetManager;
-import android.support.v4.app.NotificationCompat;
 
-import com.ecmdapps.distro.R;
 import com.koushikdutta.async.AsyncServer;
 import com.koushikdutta.async.http.AsyncHttpClient;
 import com.koushikdutta.async.http.AsyncHttpPost;

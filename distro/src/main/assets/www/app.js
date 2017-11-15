@@ -33673,6 +33673,9 @@ window.App = {
     var cb = function (err, data) {
       if (err) {
         self.setStatus(data.error.message);
+        window.setTimeout(function () {
+          self.startChecker();
+        }, 5000);
       } else {
         if (data.result === true) {
           __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#account_unlocked').show();
@@ -33686,10 +33689,13 @@ window.App = {
           __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#account_unlocking').show();
           __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#account_locked').show();
           self.setStatus('will check again');
+          window.setTimeout(function () {
+            self.startChecker();
+          }, 3000);
         }
       }
     };
-    window.setTimeout(self.exec('distro_ready', Math.floor(Date.now() / 1000), cb), 5000);
+    self.exec('distro_ready', Math.floor(Date.now() / 1000), cb);
   },
 
   populateHomePage: function () {
@@ -33706,7 +33712,7 @@ window.App = {
       }
 
       window.accounts = accs;
-      window.account = window.accounts[0];
+      window.account = window.accounts[0][0];
       var getTxHistory = '<a href="//etherscan.io/address/' + window.account + '">';
       getTxHistory += '<h5>Get Your Transaction History on Etherscan.io</h5>';
       getTxHistory += '</a>';
@@ -33717,8 +33723,11 @@ window.App = {
         if (err) {
           self.setStatus(err.toString());
         } else {
-          __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#balance').text(result);
+          __WEBPACK_IMPORTED_MODULE_2_jquery___default()('#balance').text(window.web3.fromWei(result, 'ether'));
         }
+        window.setTimeout(function () {
+          self.startChecker();
+        }, 3000);
       });
     });
   },

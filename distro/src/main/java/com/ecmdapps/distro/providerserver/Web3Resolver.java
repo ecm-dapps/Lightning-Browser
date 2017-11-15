@@ -13,19 +13,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
+import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.Sign;
 import org.web3j.crypto.TransactionEncoder;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jFactory;
 import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.methods.request.RawTransaction;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthEstimateGas;
 import org.web3j.protocol.core.methods.response.EthGasPrice;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
-import org.web3j.protocol.infura.InfuraHttpService;
+import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 
 import java.io.File;
@@ -102,7 +102,7 @@ class Web3Resolver {
         web3Future = web3Executor.submit(new Callable<Web3j>(){
             @Override
             public Web3j call (){
-                return  Web3jFactory.build(new InfuraHttpService(current_node()));
+                return  Web3jFactory.build(new HttpService(current_node()));
             }
         });
 
@@ -182,7 +182,7 @@ class Web3Resolver {
         self.web3Future = web3Executor.submit(new Callable<Web3j>(){
             @Override
             public Web3j call (){
-                return  Web3jFactory.build(new InfuraHttpService(current_node()));
+                return  Web3jFactory.build(new HttpService(current_node()));
             }
         });
     }
