@@ -1,7 +1,8 @@
-{"url": "http://localhost:8545", "title": "Start/Stop/Configure ETHEREUM", "folder": "", "order": 0}
-{"url": "https://github.com/ecm-dapps", "title": "Contact ECM DAPPS on Github", "folder": "", "order": 1}
-{"url": "https://twitter.com/RestainoAnthony", "title": "Contact Lightning's Author", "folder": "", "order": 2}
-{"url": "https://www.facebook.com/", "title": "Facebook", "folder": "", "order": 3}
-{"url": "https://twitter.com/", "title": "Twitter", "folder": "", "order": 4}
-{"url": "https://www.google.com/", "title": "Google", "folder": "", "order": 5}
-{"url": "https://www.wikipedia.org/", "title": "Wikipedia", "folder": "", "order": 6}
+{"url": "http://localhost:8545", "title": "a. Start/Stop/Configure ETHEREUM", "folder": "", "order": 0}
+{"url": "https://github.com/ecm-dapps", "title": "b. Contact ECM DAPPS on Github", "folder": "", "order": 1}
+{"url": "https://twitter.com/RestainoAnthony", "title": "c. Contact Lightning's Author", "folder": "", "order": 2}
+{"url": "https://www.facebook.com/", "title": "d. Facebook", "folder": "", "order": 3}
+{"url": "https://twitter.com/", "title": "e. Twitter", "folder": "", "order": 4}
+{"url": "https://www.google.com/", "title": "1. Google", "folder": "", "order": 5}
+{"url": "https://www.wikipedia.org/", "title": "g. Wikipedia", "folder": "", "order": 6}
+{"url": "https://ethereum.org/", "title": "h. Ethereum", "folder": "", "order": 7}

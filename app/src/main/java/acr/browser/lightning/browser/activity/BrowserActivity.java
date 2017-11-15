@@ -446,32 +446,27 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     }
 
     private void initializePS() {
-        String msg = "Got to http://localhost:8545 to start/stop/configure. Or access from your bookmarks";
+        String msg = "Got to http://localhost:8545 to start/stop/configure. You can access it from your bookmarks";
         ps = new ProviderServer(this);
         ps.start();
         Intent notificationIntent = new Intent(this, BrowserActivity.class);
         notificationIntent.putExtra("type", "EthPageUrl");
         notificationIntent.putExtra("url", "http://localhost:8545");
-        PendingIntent piGo = PendingIntent.getActivity(this, 978, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.ic_webpage)
                         .setContentTitle("The Ethereum Network is available")
                         .setContentText(msg)
-                        .setStyle(new NotificationCompat.BigTextStyle().bigText(msg))
-                        .addAction (R.drawable.ic_action_forward, "GO", piGo);
+                        .setStyle(new NotificationCompat.BigTextStyle().bigText(msg));
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (manager != null) {
-            manager.notify(0, builder.build());
+            manager.notify(978, builder.build());
         }
     }
 
     @Override
     protected void onNewIntent(Intent intent){
+        Log.d("new intent", intent.getStringExtra("type"));
         super.onNewIntent(intent);
-        if (intent.getStringExtra("type").equals("EthPageUrl")){
-            String mUrl = intent.getStringExtra("url");
-            mPresenter.loadUrlInCurrentView(mUrl);
-        }
     }
 
     @IdRes
